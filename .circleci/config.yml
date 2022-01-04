@@ -1,10 +1,4 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
 
-version: 2.1
-orbs:
-  aws-eks: circleci/aws-eks@2.0
-  kubernetes: circleci/kubernetes@1.0
 jobs:
   test-cluster:
     executor: aws-eks/python3
@@ -19,11 +13,14 @@ jobs:
           cluster-name: << parameters.cluster-name >>
       - run:
           command: |
-            kubectl get services
+            kubectl get services && sleep 300
           name: Test cluster
-
+orbs:
+  aws-eks: circleci/aws-eks@0.2.3
+  kubernetes: circleci/kubernetes@0.4.0
+version: 2.1
 workflows:
-  capstone:
+  deployment:
     jobs:
       - aws-eks/create-cluster:
           cluster-name: my-eks-demo
@@ -31,3 +28,7 @@ workflows:
           cluster-name: my-eks-demo
           requires:
             - aws-eks/create-cluster
+      - aws-eks/delete-cluster:
+          cluster-name: my-eks-demo
+          requires:
+            - test-cluster
