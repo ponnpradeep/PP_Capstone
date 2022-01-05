@@ -1,5 +1,11 @@
+version: 2.1
+
+orbs:
+  aws-eks: circleci/aws-eks@1.1.0
+  kubernetes: circleci/kubernetes@0.4.0
+
 jobs:
-  create-small-cluster:
+  create-cluster:
     executor: aws-eks/python3
     parameters:
       cluster-name:
@@ -39,21 +45,35 @@ jobs:
     steps:
       - run:
           command: |
-            sleep 540
+            sleep 120
           name: Delay cluster deletion
-orbs:
-  aws-eks: circleci/aws-eks@1.1.0
-  kubernetes: circleci/kubernetes@0.4.0
-version: 2.1
+
+  test-cluster:
+    executor: aws-eks/python3
+    parameters:
+      cluster-name:
+        description: |
+          Name of the EKS cluster
+        type: string
+    steps:
+      - kubernetes/install
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster-name >>
+      - run:
+          command: |
+            kubectl get services
+          name: Test cluster
+
+
 workflows:
   deployment:
     jobs:
-      - create-small-cluster:
-          cluster-name: eks-demo-deployment
+      - create-cluster:
+          cluster-name: pp-capstone-deployment
       - delay:
           requires:
-            - create-small-cluster
-      - aws-eks/delete-cluster:
-          cluster-name: eks-demo-deployment
+            - create-cluster
+      - test-cluster:
+          cluster-name: pp-capstone-deployment
           requires:
-            - delay
+              - create-cluster
