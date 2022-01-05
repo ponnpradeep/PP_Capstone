@@ -105,9 +105,9 @@ workflows:
       - image-build-push:
           requires:
              - lint
-      - create-cluster:
-          cluster-name: pp-capstone-deployment
-      - test-cluster:
-          cluster-name: pp-capstone-deployment
-          requires:
-              - create-cluster
+#      - create-cluster:
+#          cluster-name: pp-capstone-deployment
+#      - test-cluster:
+#          cluster-name: pp-capstone-deployment
+#          requires:
+#              - create-cluster
