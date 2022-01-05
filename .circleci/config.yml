@@ -5,6 +5,42 @@ orbs:
   kubernetes: circleci/kubernetes@0.4.0
 
 jobs:
+
+  lint:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run:
+          name: install dependencies
+          command: |            
+            make install
+      - run:
+          name: run lint
+          command: |
+            make lint
+
+  image-build-push:
+    #docker build and push image to the docker hub
+    machine: true
+    working_directory: ~/app
+    steps:
+      - checkout
+      - run:
+          name: Build/Push docker image
+          command: |
+            #Login to docker hub
+            docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
+            # Build image and add a descriptive tag
+            docker build --tag=pp-capstone .
+            # List docker images
+            docker image ls
+            # Run web app
+            docker run -it --rm -d -p 8080:80 --name web pp-capstone
+            # Push image to a docker repository
+            docker tag pp-capstone prayon/pp-capstone
+            docker push prayon/pp-capstone
+            
   create-cluster:
     executor: aws-eks/python3
     parameters:
@@ -40,13 +76,8 @@ jobs:
           nodes-max: 2
           ssh-access: false
           ssh-public-key: ''
-  delay:
-    executor: aws-eks/python3
-    steps:
-      - run:
-          command: |
-            sleep 120
-          name: Delay cluster deletion
+
+
 
   test-cluster:
     executor: aws-eks/python3
@@ -65,14 +96,17 @@ jobs:
           name: Test cluster
 
 
+
+
 workflows:
   deployment:
     jobs:
+      - lint
+      - image-build-push:
+          requires:
+             - lint
       - create-cluster:
           cluster-name: pp-capstone-deployment
-      - delay:
-          requires:
-            - create-cluster
       - test-cluster:
           cluster-name: pp-capstone-deployment
           requires:
