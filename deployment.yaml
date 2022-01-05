@@ -21,7 +21,7 @@ spec:
         app: pp-capstone-deployment
     spec:
       containers:
-        - image: prayon/pp-capstone:1.0
+        - image: prayon/pp-capstone
           imagePullPolicy: Always
           name: pp-capstone-deployment
           ports:
