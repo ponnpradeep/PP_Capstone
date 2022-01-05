@@ -189,7 +189,15 @@ workflows:
             cluster-name:  pp-capstone-deployment
             requires:
               - create-deployment     
-      - delete-cluster:
-          cluster-name: pp-capstone-deployment
-          requires:
-              - test-cluster
+      - aws-eks/update-container-image:
+            cluster-name: pp-capstone-deployment
+            container-image-updates: 'pp-capstone-deployment=prayon/pp-capstone'
+            get-rollout-status: true
+            record: true
+            requires:
+             - test-deployment
+            resource-name:  deployment/pp-capstone-deployment   
+#      - delete-cluster:
+#          cluster-name: pp-capstone-deployment
+#          requires:
+#              - test-cluster
