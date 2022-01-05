@@ -32,13 +32,13 @@ jobs:
             #Login to docker hub
             docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
             # Build image and add a descriptive tag
-            docker build --tag=pp-capstone:2.0 .
+            docker build --tag=pp-capstone:1.0 .
             # List docker images
             docker image ls
             # Run web app
-            docker run -it --rm -d -p 8080:80 --name web pp-capstone:2.0
+            docker run -it --rm -d -p 8080:80 --name web pp-capstone:1.0
             # Push image to a docker repository
-            docker push prayon/pp-capstone:2.0
+            docker push prayon/pp-capstone:1.0
             
   create-cluster:
     executor: aws-eks/python3
@@ -174,29 +174,4 @@ workflows:
       - image-build-push:
           requires:
              - lint
-      - create-cluster:
-          cluster-name: pp-capstone-deployment
-      - test-cluster:
-          cluster-name: pp-capstone-deployment
-          requires:
-              - create-cluster
-      - create-deployment:
-            cluster-name:  pp-capstone-deployment
-            requires:
-              - test-cluster
-      - test-deployment:
-            cluster-name:  pp-capstone-deployment
-            requires:
-              - create-deployment     
-      - aws-eks/update-container-image:
-            cluster-name: pp-capstone-deployment
-            container-image-updates: 'pp-capstone-deployment=prayon/pp-capstone:2.0'
-            get-rollout-status: true
-            record: true
-            requires:
-             - test-deployment
-            resource-name:  deployment/pp-capstone-deployment   
-      - delete-cluster:
-           cluster-name: pp-capstone-deployment
-           requires:
-            - test-cluster
+
