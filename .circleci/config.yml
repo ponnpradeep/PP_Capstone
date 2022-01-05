@@ -38,6 +38,7 @@ jobs:
             # Run web app
             docker run -it --rm -d -p 8080:80 --name web pp-capstone
             # Push image to a docker repository
+            docker tag pp-capstone prayon/pp-capstone
             docker push prayon/pp-capstone
             
   create-cluster:
