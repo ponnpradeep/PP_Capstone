@@ -32,14 +32,13 @@ jobs:
             #Login to docker hub
             docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
             # Build image and add a descriptive tag
-            docker build --tag=pp-capstone:2.0 .
+            docker build --tag=pp-capstone .
             # List docker images
             docker image ls
             # Run web app
-            docker run -it --rm -d -p 8080:80 --name web pp-capstone:2.0
+            docker run -it --rm -d -p 8080:80 --name web pp-capstone
             # Push image to a docker repository
-            docker tag pp-capstone:2.0 prayon/pp-capstone
-            docker push prayon/pp-capstone:2.0
+            docker push prayon/pp-capstone
             
   create-cluster:
     executor: aws-eks/python3
