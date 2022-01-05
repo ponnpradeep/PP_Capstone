@@ -36,7 +36,7 @@ jobs:
             # List docker images
             docker image ls
             # Run web app
-            docker run -it --rm -d -p 8080:80 --name web pp-capstone
+            docker run -it --rm -d -p 8080:80 --name web pp-capstone:2.0
             # Push image to a docker repository
             docker push prayon/pp-capstone:2.0
             
@@ -196,7 +196,7 @@ workflows:
             requires:
              - test-deployment
             resource-name:  deployment/pp-capstone-deployment   
-#      - delete-cluster:
-#          cluster-name: pp-capstone-deployment
-#          requires:
-#              - test-cluster
+      - delete-cluster:
+           cluster-name: pp-capstone-deployment
+           requires:
+            - test-cluster
