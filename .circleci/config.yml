@@ -92,7 +92,44 @@ jobs:
       - run:
           command: |
             kubectl get services
+            kubectl get nodes
           name: Test cluster
+  
+  create-deployment:
+    executor: aws-eks/python3
+    parameters:
+      cluster-name:
+        description: |
+          Name of the EKS cluster
+        type: string
+    steps:
+      - checkout
+      - kubernetes/install
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster-name >>
+          install-kubectl: true
+      - kubernetes/create-or-update-resource:
+          get-rollout-status: true
+          resource-file-path: deployment.yaml
+          resource-name: deployment/pp-capstone-deployment
+          
+  test-deployment:
+    executor: aws-eks/python3
+    parameters:
+      cluster-name:
+        description: |
+          Name of the EKS cluster
+        type: string
+    steps:
+      - kubernetes/install
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster-name >>
+      - run:
+          command: |
+            kubectl get svc
+            kubectl get nodes
+            kubectl get deployment
+          name: Test Deployment
 
   delete-cluster:
     executor: aws-eks/python3
@@ -144,6 +181,14 @@ workflows:
           cluster-name: pp-capstone-deployment
           requires:
               - create-cluster
+      - create-deployment:
+            cluster-name:  pp-capstone-deployment
+            requires:
+              - test-cluster
+      - test-deployment:
+            cluster-name:  pp-capstone-deployment
+            requires:
+              - create-deployment     
       - delete-cluster:
           cluster-name: pp-capstone-deployment
           requires:
